@@ -1,10 +1,9 @@
 {% load static %}
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <title>{% block title %} {% endblock %}</title>
-    <link href="{% static "css/base.css" %}" rel="stylesheet">
+  <title>{% block title %}{% endblock %}</title>
+  <link href="{% static "css/base.css" %}" rel="stylesheet">
 </head>
 <body>
   <div id="header">
@@ -18,7 +17,7 @@
         <a href="{% url "images:list" %}">Images</a>
       </li>
       <li {% if section == "people" %}class="selected"{% endif %}>
-        <a href="#">People</a>
+        <a href="{% url "user_list" %}">People</a>
       </li>
     </ul>
   {% endif %}
@@ -48,7 +47,7 @@
     {% endblock %}
   </div>
 
-  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/js-cookie@2.2.1/src/js.cookie.min.js"></script>
   <script>
     var csrftoken = Cookies.get('csrftoken');

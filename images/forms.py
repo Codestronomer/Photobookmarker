@@ -18,7 +18,7 @@ class ImageCreateForm(forms.ModelForm):
         valid_extensions = ['jpeg', 'jpg']
         extension = url.rsplit('.', 1)[1].lower()
         if extension not in valid_extensions:
-            raise forms.ValidationError('The given URL does not match ' \
+            raise forms.ValidationError('The given URL does not match '\
                                         'valid image extensions.')
         return url
 

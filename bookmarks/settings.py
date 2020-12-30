@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/3.1/ref/settings/
 """
 import os
 from pathlib import Path
+from django.urls import reverse_lazy
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -39,7 +40,8 @@ INSTALLED_APPS = [
     'social_django',
     'django_extensions',
     'images.apps.ImagesConfig',
-    'easy_thumbnails'
+    'easy_thumbnails',
+    'actions.apps.ActionsConfig',
 
 ]
 
@@ -140,9 +142,16 @@ SOCIAL_AUTH_FACEBOOK_KEY = '665200640840647'  # Facebook App Id
 SOCIAL_AUTH_FACEBOOK_SECRET = 'de0267c11d833c29c506a0f244e195d2'  # Facebook App secret
 SOCIAL_AUTH_FACEBOOK_SCOPE = ['email']
 
-SOCIAL_AUTH_TWITTER_KEY = 'JjsBGisKViwN9LVrlkEgkpWHc'   # Api key
-SOCIAL_AUTH_TWITTER_SECRET = '5D1xjNF5rNrvMnXJS5hzFsH4mArKdAYahU3h7NCzLOmYmWZtKl'   # Api secret
+SOCIAL_AUTH_TWITTER_KEY = 'JjsBGisKViwN9LVrlkEgkpWHc'  # Api key
+SOCIAL_AUTH_TWITTER_SECRET = '5D1xjNF5rNrvMnXJS5hzFsH4mArKdAYahU3h7NCzLOmYmWZtKl'  # Api secret
 
 SOCIAL_AUTH_GOOGLE_OAUTH2_KEY = '745039151296-04i2tmfmbbia14o7v2bssi8bvu88ts17.apps.googleusercontent.com'
 # Google consumer ID
 SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET = 'KP8JYAMKp0-2_OvqKJWFZXEU'  # Google consumer secret
+
+ABSOLUTE_URL_OVERRIDES = {
+    'auth.user': lambda u: reverse_lazy('user_detail',
+                                        args=[u.username])
+}
+
+THUMBNAIL_DEBUG = False
