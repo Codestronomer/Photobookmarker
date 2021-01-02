@@ -1,4 +1,3 @@
-import redis
 from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
@@ -9,10 +8,17 @@ from django.http import HttpResponse
 from django.core.paginator import Paginator, EmptyPage, \
                                   PageNotAnInteger
 from common.decorators import ajax_required
+from actions.utils import create_action
 from .forms import ImageCreateForm
 from .models import Image
-from actions.utils import create_action
+
+import redis
 from django.conf import settings
+
+# connect to redis
+r = redis.Redis(host=settings.REDIS_HOST,
+                port=settings.REDIS_PORT,
+                db=settings.REDIS_DB)
 
 
 @login_required
@@ -45,7 +51,7 @@ def image_create(request):
 
 def image_detail(request, id, slug):
     image = get_object_or_404(Image, id=id, slug=slug)
-    # increment total views by 1
+    # increment total image views by 1
     total_views = r.incr(f'image:{image.id}:views')
     # increment image ranking by 1
     r.zincrby('image_ranking', 1, image.id)
@@ -79,19 +85,19 @@ def image_like(request):
 @login_required
 def image_list(request):
     images = Image.objects.all()
-    paginator = Paginator(images, 8)
+    paginator = Paginator(images, 1)
     page = request.GET.get('page')
     try:
         images = paginator.page(page)
     except PageNotAnInteger:
-        # If page is not an integer, deliver the first page
+        # If page is not an integer deliver the first page
         images = paginator.page(1)
     except EmptyPage:
         if request.is_ajax():
-            # If the result is AJAX and page is out of range
+            # If the request is AJAX and the page is out of range
             # return an empty page
             return HttpResponse('')
-        # if image is out of range deliver last page
+        # If page is out of range deliver last page of results
         images = paginator.page(paginator.num_pages)
     if request.is_ajax():
         return render(request,
@@ -102,19 +108,16 @@ def image_list(request):
                    {'section': 'images', 'images': images})
 
 
-r = redis.Redis(host=settings.REDIS_HOST,
-                port=settings.REDIS_PORT,
-                db=settings.REDIS_DB)
-
 @login_required
 def image_ranking(request):
     # get image ranking dictionary
     image_ranking = r.zrange('image_ranking', 0, -1, desc=True)[:10]
     image_ranking_ids = [int(id) for id in image_ranking]
-    # Get the most viewed images
+    # get most viewed images
     most_viewed = list(Image.objects.filter(
-                                            id__in=image_ranking_ids))
+                           id__in=image_ranking_ids))
     most_viewed.sort(key=lambda x: image_ranking_ids.index(x.id))
     return render(request,
                   'images/image/ranking.html',
-                  {'most_viewed': most_viewed})
+                  {'section': 'images',
+                   'most_viewed': most_viewed})
